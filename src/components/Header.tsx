@@ -10,7 +10,7 @@ const Header = () => {
         </div>
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-1">
-            Smart House
+            Smart Home
           </h1>
           <p className="text-slate-300 text-lg">
             Sistema de controle de luzes
