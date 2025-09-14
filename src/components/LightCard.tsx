@@ -1,17 +1,16 @@
 import { LucideIcon } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 
-interface Light {
+interface LightCardData {
   id: string;
   name: string;
   room: string;
   isOn: boolean;
   icon: LucideIcon;
-  brightness?: number;
 }
 
 interface LightCardProps {
-  light: Light;
+  light: LightCardData;
   onToggle: () => void;
 }
 
@@ -63,7 +62,6 @@ export const LightCard = ({ light, onToggle }: LightCardProps) => {
           
         </div>
 
-        {/* Status indicator */}
         <div className="flex items-center mt-4 gap-2">
           <div className={`
             w-2 h-2 rounded-full transition-all duration-300

@@ -1,11 +1,22 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+import { iconMap } from '@/lib/iconMap';
+
 interface LampFormData {
   name: string;
   esp32Id: string;
   relayPin: number | '';
   room?: string;
+  iconName: string;
 }
 
 interface AddLampModalProps {
@@ -20,6 +31,7 @@ export const AddLampModal: React.FC<AddLampModalProps> = ({ isOpen, onClose, onS
     name: '',
     esp32Id: esp32List.length > 0 ? esp32List[0].id : '',
     relayPin: '',
+    iconName: 'Lightbulb',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +43,13 @@ export const AddLampModal: React.FC<AddLampModalProps> = ({ isOpen, onClose, onS
     setFormData(prev => ({
       ...prev,
       [name]: name === 'relayPin' ? (value === '' ? '' : parseInt(value, 10)) : value,
+    }));
+  };
+
+  const handleIconChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      iconName: value,
     }));
   };
 
@@ -100,6 +119,25 @@ export const AddLampModal: React.FC<AddLampModalProps> = ({ isOpen, onClose, onS
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
+          </div>
+          
+          <div className="mb-4">
+            <label htmlFor="icon" className="block font-medium mb-1">Ícone</label>
+            <Select value={formData.iconName} onValueChange={handleIconChange}>
+              <SelectTrigger className="w-full text-white">
+                <SelectValue placeholder="Selecione um ícone" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(iconMap).map(([name, IconComponent]) => (
+                  <SelectItem key={name} value={name}>
+                    <div className="flex items-center gap-2">
+                      <IconComponent className="w-4 h-4" />
+                      <span>{name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}

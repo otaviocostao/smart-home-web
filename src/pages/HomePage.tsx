@@ -1,73 +1,63 @@
-import { Bath, Bed, Car, Home, Lightbulb, Plus, Sofa, TreePine, Utensils } from 'lucide-react';
+import { Plus} from 'lucide-react';
+import { Lamp, Fan, Tv, AirVent, LucideIcon } from 'lucide-react';
 import '../App.css'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import { LightCard } from '../components/LightCard';
 import { Button } from '@/components/ui/button';
 import AddLampModal from '@/components/AddLampModal';
 
-interface Light {
-  id: string;
+import { addLamp, onLampsChange, toggleLampState } from '@/services/lampService';
+import { Light } from '@/types';
+const iconMap: { [key: string]: LucideIcon } = {
+  lamp: Lamp,
+  fan: Fan,
+  tv: Tv,
+  airvent: AirVent
+};
+
+const DefaultIcon = Lamp;
+
+interface LampFormData {
   name: string;
-  room: string;
-  isOn: boolean;
-  icon: typeof Lightbulb;
-  brightness?: number;
+  esp32Id: string;
+  relayPin: number | '';
+  room?: string;
+  iconName: string;
 }
 
 const HomePage = () => {
-  const [lights, setLights] = useState<Light[]>([
-    { id: '1', name: 'Main Light', room: 'Living Room', isOn: true, icon: Sofa, brightness: 80 },
-    { id: '2', name: 'Ceiling Light', room: 'Kitchen', isOn: false, icon: Utensils, brightness: 60 },
-    { id: '3', name: 'Bedside Lamp', room: 'Bedroom', isOn: true, icon: Bed, brightness: 40 },
-    { id: '4', name: 'Reading Light', room: 'Bedroom', isOn: false, icon: Bed, brightness: 70 },
-    { id: '5', name: 'Bathroom Light', room: 'Bathroom', isOn: false, icon: Bath, brightness: 90 },
-    { id: '6', name: 'Garage Light', room: 'Garage', isOn: false, icon: Car, brightness: 100 },
-    { id: '7', name: 'Garden Light', room: 'Garden', isOn: true, icon: TreePine, brightness: 30 },
-  ]);
 
-  interface LampFormData {
-    name: string;
-    esp32Id: string;
-    relayPin: number | '';
-    room?: string;
-  }
-
-  const MOCK_ESP32_LIST = [
-  { id: 'esp32-sala-_hG8sJ', name: 'ESP32 da Sala' },
-  { id: 'esp32-cozinha-kLp2qR', name: 'ESP32 da Cozinha' },
-  { id: 'esp32-quarto-aBcV1w', name: 'ESP32 do Quarto' },
-];
-
-  const toggleLight = (id: string) => {
-    setLights(lights.map(light => 
-      light.id === id ? { ...light, isOn: !light.isOn } : light
-    ));
-  };
-
+  const [lights, setLights] = useState<Light[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleOpenModal = () => {
-    console.log('Abrindo modal para adicionar nova lâmpada');
-    setIsModalOpen(true);
+  useEffect(() => {
+    const unsubscribe = onLampsChange((fetchedLights) => {
+      setLights(fetchedLights);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []); 
+
+  const toggleLight = (id: string, currentIsOn: boolean) => {
+    
+    toggleLampState(id, currentIsOn).catch(err => console.error("Falha ao alterar estado", err));
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
 
   const handleLampSubmit = async (formData: LampFormData) => {
-    console.log('Novos dados da lâmpada:', formData);
-    
-    try {
-
-      console.log('Lâmpada salva com sucesso!');
-      
-    } catch (error) {
-      console.error('Erro ao salvar a lâmpada:', error);
-      throw error;
-    }
+    await addLamp(formData);
   };
+
+  const MOCK_ESP32_LIST = [
+    { id: 'esp32-sala-_hG8sJ', name: 'ESP32 da Sala' },
+    { id: 'esp32-cozinha-kLp2qR', name: 'ESP32 da Cozinha' },
+    { id: 'esp32-quarto-aBcV1w', name: 'ESP32 do Quarto' },
+  ];
 
   return (
      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
@@ -80,19 +70,22 @@ const HomePage = () => {
           hover:bg-amber-500 transition-discrete'><Plus/>Adicionar</Button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {lights.map((light) => (
+          {lights.map((light) => {
+            const IconComponent = iconMap[light.iconName] || DefaultIcon;
+            return (
               <LightCard
                 key={light.id}
-                light={light}
-                onToggle={() => toggleLight(light.id)}
+                light={{...light, icon: IconComponent }}
+                onToggle={() => toggleLight(light.id, light.isOn)}
               />
-            ))}
+            )
+          })}
         </div>
         <AddLampModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onSubmit={handleLampSubmit} 
-        esp32List={MOCK_ESP32_LIST}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onSubmit={handleLampSubmit}
+          esp32List={MOCK_ESP32_LIST}
         />
       </div>
 
