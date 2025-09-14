@@ -1,4 +1,4 @@
-import { Lightbulb, LucideIcon } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 
 interface Light {
@@ -60,26 +60,7 @@ export const LightCard = ({ light, onToggle }: LightCardProps) => {
             {light.room}
           </p>
           
-          {light.brightness && (
-            <div className="mt-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className={`text-xs ${light.isOn ? 'text-amber-200' : 'text-slate-500'}`}>
-                  Brightness
-                </span>
-                <span className={`text-xs font-medium ${light.isOn ? 'text-white' : 'text-slate-400'}`}>
-                  {light.brightness}%
-                </span>
-              </div>
-              <div className="w-full bg-slate-700 rounded-full h-2">
-                <div 
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    light.isOn ? 'bg-gradient-to-r from-amber-400 to-yellow-500' : 'bg-slate-600'
-                  }`}
-                  style={{ width: `${light.brightness}%` }}
-                />
-              </div>
-            </div>
-          )}
+          
         </div>
 
         {/* Status indicator */}
